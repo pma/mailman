@@ -8,7 +8,7 @@ defmodule Mailman.EexComposer do
     end
   end
 
-  def compile_part(config, :attachments, _) do
+  def compile_part(_config, :attachments, _) do
     []
   end
 
@@ -16,4 +16,3 @@ defmodule Mailman.EexComposer do
     compile_text_part(config, mode, email)
   end
 end
-
