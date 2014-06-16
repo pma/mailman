@@ -4,24 +4,24 @@ defmodule DataEncoding do
   def quoted_from(text) do
     align_quoted(code_quoted(text))
   end
-  
+
   # Returns a string with a hex value based on given integer
   def int_to_hex_string(code) do
-    integer_to_list(code, 16) |> String.from_char_list!
+    integer_to_list(code, 16) |> List.to_string
   end
 
   def int_to_quoted_string(code) do
     cond do
       code == 61 -> "=3D"
-      code == 9 || code == 10 || code == 13 || (code >= 32 && code <= 126 && code != 61) -> String.from_char_list!([code])
+      code == 9 || code == 10 || code == 13 || (code >= 32 && code <= 126 && code != 61) -> List.to_string([code])
       true -> "=#{int_to_hex_string(code)}"
     end
   end
-  
+
   # Aligns a text to 76 charectars, ending lines with a soft break
   # using a '=' character followed by CRLF
   def align_quoted(text) do
-    joiner = fn(str, [last, acc]) -> 
+    joiner = fn(str, [last, acc]) ->
       line = cond  do
         last == "" -> str
         String.length(last) == 74 -> "=\n" <> str
@@ -31,26 +31,26 @@ defmodule DataEncoding do
       [str, joined]
     end
     replace_last_spaces_and_tabs = fn(l) ->
-      reversed = Enum.reverse(l) 
+      reversed = Enum.reverse(l)
       [last_char | rest] = reversed
       cond do
-         last_char == 32 -> String.from_char_list!(Enum.reverse(rest)) <> "=20"
-         last_char == 9  -> String.from_char_list!(Enum.reverse(rest)) <> "=09"
-         true      -> String.from_char_list!(l)
+         last_char == 32 -> List.to_string(Enum.reverse(rest)) <> "=20"
+         last_char == 9  -> List.to_string(Enum.reverse(rest)) <> "=09"
+         true      -> List.to_string(l)
       end
     end
 
     d = String.split(text, "\n")
-    d = Enum.map(d, fn(l) -> String.to_char_list!(l) end)
+    d = Enum.map(d, fn(l) -> String.to_char_list(l) end)
 
-    d = Enum.map(d, fn(l) -> Enum.map(Enum.chunk(l, 74, 74, ''), fn(i) -> String.from_char_list!(i) end) end)
-      |> List.flatten |> Enum.map(fn(l) -> String.to_char_list!(l) end)
+    d = Enum.map(d, fn(l) -> Enum.map(Enum.chunk(l, 74, 74, ''), fn(i) -> List.to_string(i) end) end)
+      |> List.flatten |> Enum.map(fn(l) -> String.to_char_list(l) end)
 
     d = Enum.map d, replace_last_spaces_and_tabs
 
     Enum.reduce(d, ["",""], joiner)
       |> List.last
-  end 
+  end
 
   # Replaces non ASCII characters with quoted alternatives
   def code_quoted(text) do
